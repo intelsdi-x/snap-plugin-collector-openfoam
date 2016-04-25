@@ -58,13 +58,13 @@ if [[ $TEST_SUITE == "unit" ]]; then
 
 	echo "go vet"
 	go vet $VET_DIRS
-	go test -race ./... - Lets disable for now
+	go test -race ./... 
  
 	# Run test coverage on each subdirectories and merge the coverage profile.
 	echo "mode: count" > profile.cov
  
 	# Standard go tooling behavior is to ignore dirs with leading underscors
-	for dir in $(find . -maxdepth 10 -not -path './.git*' -not -path '*/_*' -not -path './examples/*' -not -path './scripts/*' -not -path './build/*' -not -path './Godeps/*' -type d);
+	for dir in $(find . -maxdepth 10 -not -path './.git*' -not -path './vendor/*' -not -path '*/_*' -not -path './examples/*' -not -path './scripts/*' -not -path './build/*' -not -path './Godeps/*' -type d);
 	do
 		if ls $dir/*.go &> /dev/null; then
 	    		go test --tags=unit  -covermode=count -coverprofile=$dir/profile.tmp $dir
