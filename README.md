@@ -1,7 +1,7 @@
 # Snap Collector Plugin - OpenFOAM
 
 [![Build Status](https://api.travis-ci.org/intelsdi-x/snap-plugin-collector-openfoam.svg)](https://travis-ci.org/intelsdi-x/snap-plugin-collector-openfoam)
-[![Go Report Card](http://goreportcard.com/badge/intelsdi-x/snap-plugin-collector-openfoam)](http://goreportcard.com/report/intelsdi-x/snap-plugin-collector-openfoam)
+[![Go Report Card](https://goreportcard.com/badge/intelsdi-x/snap-plugin-collector-openfoam)](https://goreportcard.com/report/intelsdi-x/snap-plugin-collector-openfoam)
  
  1. [Getting Started](#getting-started)
    * [System Requirements](#system-requirements)
