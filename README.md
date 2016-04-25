@@ -1,12 +1,12 @@
 # Snap Collector Plugin - OpenFOAM
 
-[![Build Status](https://api.travis-ci.org/intelsdi-x/snap-plugin-collector-openfoam.svg)](https://travis-ci.org/intelsdi-x/snap-plugin-collector-openfoam )
+[![Build Status](https://api.travis-ci.org/intelsdi-x/snap-plugin-collector-openfoam.svg)](https://travis-ci.org/intelsdi-x/snap-plugin-collector-openfoam)
 [![Go Report Card](http://goreportcard.com/badge/intelsdi-x/snap-plugin-collector-openfoam)](http://goreportcard.com/report/intelsdi-x/snap-plugin-collector-openfoam)
  
  1. [Getting Started](#getting-started)
    * [System Requirements](#system-requirements)
    * [Installation](#installation)
-   * [Configuration and Usage](configuration-and-usage)
+   * [Configuration and Usage](#configuration-and-usage)
  2. [Documentation](#documentation)
    * [Collected Metrics](#collected-metrics)
    * [Examples](#examples)
@@ -20,13 +20,17 @@
  
  ### System Requirements
  
- OpenFOAM instance with log file hosted by http server http://www.openfoam.com/
+ OpenFOAM instance with log file hosted by http server http://www.openfoam.com/ .
  
  #### Compile plugin
  ```
  make
  ```
- 
+### Configuration and Usage
+
+* Set up the [snap framework](https://github.com/intelsdi-x/snap/blob/master/README.md#getting-started).
+* Load the plugin and create a task, see example in [Examples](https://github.com/intelsdi-x/snap-plugin-collector-openfoam/blob/master/README.md#examples).
+
  ### Documentation
  
  ### Examples
@@ -42,7 +46,7 @@
  ```
  $ snapctl plugin load $SNAP_OPENFOAM_PLUGIN_DIR/build/rootfs/snap-plugin-collector-openfoam
  ```
- See available metrics for your system
+ See available metrics for your system.
  ```
  $ snapctl metric list
  ```
@@ -153,12 +157,13 @@
  If you have a feature request, please add it as an [issue](https://github.com/intelsdi-x/snap-plugin-collector-openfoam/issues/new) and/or submit a [pull request](https://github.com/intelsdi-x/snap-plugin-collector-openfoam/pulls).
  
  ## Community Support
- This repository is one of **many** plugins in **snap**, a powerful telemetry framework. See the full project at http://github.com/intelsdi-x/snap To reach out to other users, head to the [main framework](https://github.com/intelsdi-x/snap#community-support)
+ This repository is one of **many** plugins in **snap**, a powerful telemetry framework. See the full project at http://github.com/intelsdi-x/snap To reach out to other users, head to the [main framework](https://github.com/intelsdi-x/snap#community-support).
  
  ## Contributing
  We love contributions!
  
  There's more than one way to give back, from examples to blogs to code updates. See our recommended process in [CONTRIBUTING.md](CONTRIBUTING.md).
+ And **thank you!** Your contribution, through code and participation, is incredibly important to us.
  
  ## License
  [snap](http://github.com/intelsdi-x/snap), along with this plugin, is an Open Source software released under the Apache 2.0 [License](LICENSE).
@@ -168,5 +173,3 @@
  
  * Author: [Marcin Spoczynski](https://github.com/sandlbn/)
  
- ## Thank You
- And **thank you!** Your contribution, through code and participation, is incredibly important to us.

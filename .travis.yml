@@ -6,6 +6,7 @@ go:
 env:
   global:
     - SNAP_PLUGIN_SOURCE=/home/travis/gopath/src/github.com/intelsdi-x/snap-plugin-collector-openfoam
+    - GO15VENDOREXPERIMENT=1
   matrix:
     - TEST=unit
 before_install:
