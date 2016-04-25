@@ -1,0 +1,40 @@
+{
+    "version": 1,
+    "schedule": {
+        "type": "simple",
+        "interval": "1s"
+    },
+    "workflow": {
+        "collect": {
+            "metrics": {
+                "/intel/openfoam/k/initial": {},
+                "/intel/openfoam/Ux/final": {},
+                "/intel/openfoam/Uy/initial": {}
+
+            },
+            "config": {
+                "/intel/openfoam": {
+                    "webServerIP": "192.168.122.89",
+                    "webServerPort": 8000,
+                    "webServerFilePath": "run.log"
+                }
+            },
+            "process": [
+                {
+                    "plugin_name": "passthru",
+                    "process": null,
+                    "publish": [
+                        {                         
+                            "plugin_name": "file",
+                            "config": {
+                                "file": "/tmp/published_openfoam"
+                            }
+                        }
+                    ],
+                    "config": null
+                }
+            ],
+            "publish": null
+        }
+    }
+}
