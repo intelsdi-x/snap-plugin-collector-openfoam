@@ -31,6 +31,7 @@ import (
 
 	"github.com/intelsdi-x/snap/control/plugin"
 	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
+	"github.com/intelsdi-x/snap/core"
 	"github.com/intelsdi-x/snap/core/cdata"
 	"github.com/intelsdi-x/snap/core/ctypes"
 	"github.com/jarcoal/httpmock"
@@ -86,7 +87,7 @@ func TestOpenFoamPlugin(t *testing.T) {
 	Convey("Get Metrics Types", t, func() {
 		openFoamCol := NewOpenFoamCollector()
 		cfgNode := cdata.NewNode()
-		var cfg = plugin.PluginConfigType{
+		var cfg = plugin.ConfigType{
 			ConfigDataNode: cfgNode,
 		}
 		Convey("So should return 12 types of metrics", func() {
@@ -96,7 +97,7 @@ func TestOpenFoamPlugin(t *testing.T) {
 		})
 		Convey("So should check namespace", func() {
 			metrics, err := openFoamCol.GetMetricTypes(cfg)
-			waitNamespace := joinNamespace(metrics[0].Namespace())
+			waitNamespace := joinNamespace(metrics[0].Namespace().Strings())
 			wait := regexp.MustCompile(`^/intel/openfoam/k/initial`)
 			So(true, ShouldEqual, wait.MatchString(waitNamespace))
 			So(err, ShouldBeNil)
@@ -128,8 +129,8 @@ func TestOpenFoamPlugin(t *testing.T) {
 		)
 
 		Convey("So should collect k metrics", func() {
-			metrics := []plugin.PluginMetricType{{
-				Namespace_: []string{"intel", "openfoam", "k", "initial"},
+			metrics := []plugin.MetricType{{
+				Namespace_: core.NewNamespace("intel", "openfoam", "k", "initial"),
 				Config_:    cfgNode,
 			}}
 			collect, err := openFoamCol.CollectMetrics(metrics)
@@ -139,8 +140,8 @@ func TestOpenFoamPlugin(t *testing.T) {
 
 		})
 		Convey("So should collect Uz metrics", func() {
-			metrics := []plugin.PluginMetricType{{
-				Namespace_: []string{"intel", "openfoam", "Uz", "final"},
+			metrics := []plugin.MetricType{{
+				Namespace_: core.NewNamespace("intel", "openfoam", "Uz", "final"),
 				Config_:    cfgNode,
 			}}
 			collect, err := openFoamCol.CollectMetrics(metrics)
@@ -151,8 +152,8 @@ func TestOpenFoamPlugin(t *testing.T) {
 
 		})
 		Convey("So should collect Ux metrics", func() {
-			metrics := []plugin.PluginMetricType{{
-				Namespace_: []string{"intel", "openfoam", "Ux", "final"},
+			metrics := []plugin.MetricType{{
+				Namespace_: core.NewNamespace("intel", "openfoam", "Ux", "final"),
 				Config_:    cfgNode,
 			}}
 			collect, err := openFoamCol.CollectMetrics(metrics)
@@ -163,8 +164,8 @@ func TestOpenFoamPlugin(t *testing.T) {
 
 		})
 		Convey("So should return error if value dosn't exist", func() {
-			metrics := []plugin.PluginMetricType{{
-				Namespace_: []string{"intel", "openfoam", "fUx", "final"},
+			metrics := []plugin.MetricType{{
+				Namespace_: core.NewNamespace("intel", "openfoam", "fUx", "final"),
 				Config_:    cfgNode,
 			}}
 			_, err := openFoamCol.CollectMetrics(metrics)

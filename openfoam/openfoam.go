@@ -29,6 +29,7 @@ import (
 
 	"github.com/intelsdi-x/snap/control/plugin"
 	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
+	"github.com/intelsdi-x/snap/core"
 	"github.com/intelsdi-x/snap/core/ctypes"
 )
 
@@ -36,7 +37,7 @@ const (
 	// Name of plugin
 	Name = "openfoam"
 	// Version of plugin
-	Version = 1
+	Version = 2
 	// Type of plugin
 	Type = plugin.CollectorPluginType
 )
@@ -64,8 +65,8 @@ func joinNamespace(ns []string) string {
 var OpenFoamMetrics = []string{"k", "p", "Ux", "Uy", "Uz", "omega"}
 
 // CollectMetrics returns collected metrics
-func (p *OpenFoam) CollectMetrics(mts []plugin.PluginMetricType) ([]plugin.PluginMetricType, error) {
-	metrics := make([]plugin.PluginMetricType, len(mts))
+func (p *OpenFoam) CollectMetrics(mts []plugin.MetricType) ([]plugin.MetricType, error) {
+	metrics := make([]plugin.MetricType, len(mts))
 
 	webServerIP := mts[0].Config().Table()["webServerIP"].(ctypes.ConfigValueStr).Value
 	webServerPort := mts[0].Config().Table()["webServerPort"].(ctypes.ConfigValueInt).Value
@@ -113,11 +114,11 @@ func (p *OpenFoam) GetConfigPolicy() (*cpolicy.ConfigPolicy, error) {
 }
 
 // GetMetricTypes returns metric types that can be collected
-func (p *OpenFoam) GetMetricTypes(cfg plugin.PluginConfigType) ([]plugin.PluginMetricType, error) {
-	var metrics []plugin.PluginMetricType
+func (p *OpenFoam) GetMetricTypes(cfg plugin.ConfigType) ([]plugin.MetricType, error) {
+	var metrics []plugin.MetricType
 	for _, metricType := range OpenFoamMetrics {
-		metrics = append(metrics, plugin.PluginMetricType{Namespace_: []string{"intel", "openfoam", metricType, "initial"}})
-		metrics = append(metrics, plugin.PluginMetricType{Namespace_: []string{"intel", "openfoam", metricType, "final"}})
+		metrics = append(metrics, plugin.MetricType{Namespace_: core.NewNamespace("intel", "openfoam", metricType, "initial")})
+		metrics = append(metrics, plugin.MetricType{Namespace_: core.NewNamespace("intel", "openfoam", metricType, "final")})
 	}
 	return metrics, nil
 }
@@ -128,7 +129,7 @@ func handleErr(e error) {
 	}
 }
 
-func openFoamStat(ns []string, webServerURL string, path string) (*plugin.PluginMetricType, error) {
+func openFoamStat(ns core.Namespace, webServerURL string, path string) (*plugin.MetricType, error) {
 	data, err := getOpenFoamLog(webServerURL, path)
 	if err != nil {
 		return nil, err
@@ -139,7 +140,7 @@ func openFoamStat(ns []string, webServerURL string, path string) (*plugin.Plugin
 		return nil, err
 	}
 
-	return &plugin.PluginMetricType{
+	return &plugin.MetricType{
 		Namespace_: ns,
 		Data_:      value,
 		Timestamp_: time.Now(),
@@ -147,8 +148,8 @@ func openFoamStat(ns []string, webServerURL string, path string) (*plugin.Plugin
 
 }
 
-func getLastValue(ns []string, data []string) (float64, error) {
-	searchFor := ns[2]
+func getLastValue(ns core.Namespace, data []string) (float64, error) {
+	searchFor := ns.Strings()[2]
 	switch searchFor {
 	case "k":
 		searchFor = "for k"
@@ -158,7 +159,7 @@ func getLastValue(ns []string, data []string) (float64, error) {
 
 	for i := len(data) - 1; i >= 0; i-- {
 		if strings.Contains(data[i], searchFor) {
-			value, err := getPositionalValue(ns[3], data[i])
+			value, err := getPositionalValue(ns.Strings()[3], data[i])
 
 			if err != nil {
 				log.Fatal(err)
