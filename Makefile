@@ -19,7 +19,7 @@ default:
 	$(MAKE) deps
 	$(MAKE) all
 deps:
-	bash -c "go get -t -v $(go list ./... | grep -v /vendor/)"
+	bash -c "godep restore"
 test:
 	bash -c "./scripts/test.sh $(TEST)"
 check:

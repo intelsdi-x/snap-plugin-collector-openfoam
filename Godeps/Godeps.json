@@ -2,9 +2,6 @@
 	"ImportPath": "github.com/intelsdi-x/snap-plugin-collector-openfoam",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v59",
-	"Packages": [
-		"."
-	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
@@ -17,58 +14,62 @@
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/control/plugin",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/control/plugin/cpolicy",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/control/plugin/encoding",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/control/plugin/encrypter",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/core",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/core/cdata",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/core/ctypes",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/core/serror",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/pkg/ctree",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/pkg/schedule",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/scheduler/wmap",
-			"Comment": "v0.13.0-beta-52-g36f019d",
-			"Rev": "36f019d57fc53de7d60a23dfeae043ef75032fca"
+			"Comment": "v0.13.0-beta-79-ga579d11",
+			"Rev": "a579d11b579d8bf521ffc51ae3416e84543d209c"
+		},
+		{
+			"ImportPath": "github.com/jarcoal/httpmock",
+			"Rev": "145b10d659265440f062c31ea15326166bae56ee"
 		},
 		{
 			"ImportPath": "github.com/jtolds/gls",
