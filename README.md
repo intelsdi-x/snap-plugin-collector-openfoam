@@ -173,3 +173,4 @@
  
  * Author: [Marcin Spoczynski](https://github.com/sandlbn/)
  
+This software has been contributed by MIKELANGELO, a Horizon 2020 project co-funded by the European Union. https://www.mikelangelo-project.eu/
