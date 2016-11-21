@@ -22,109 +22,88 @@
  
  OpenFOAM instance with log file hosted by http server http://www.openfoam.com/ .
  
+ #### Download the plugin binary:
+
+You can get the pre-built binaries for your OS and architecture from the plugin's [GitHub Releases](https://github.com/intelsdi-x/snap-plugin-collector-openfoam/releases) page.
+
  #### Compile plugin
  ```
  make
  ```
 ### Configuration and Usage
 
-* Set up the [snap framework](https://github.com/intelsdi-x/snap/blob/master/README.md#getting-started).
-* Load the plugin and create a task, see example in [Examples](https://github.com/intelsdi-x/snap-plugin-collector-openfoam/blob/master/README.md#examples).
+This plugin requires these config values to be set (examples are given):
+- `webServerIP` (ex. `"192.168.122.89"`)
+- `webServerPort` (ex. `8000`)
+- `webServerFilePath` (ex. `"run.log"`)
 
  ### Documentation
  
  ### Examples
- Example running OpenFoam, passthru processor, and writing data to a file.
- 
- In one terminal window, open the snap daemon :
- ```
- $ snapd -t 0 -l 1
- ```
- 
- In another terminal window:
- Load OpenFoam plugin
- ```
- $ snapctl plugin load $SNAP_OPENFOAM_PLUGIN_DIR/build/rootfs/snap-plugin-collector-openfoam
- ```
+Example of running snap OpenFOAM collector and writing data to file.
+
+Ensure [snap daemon is running](https://github.com/intelsdi-x/snap#running-snap):
+* initd: `sudo service snap-telemetry start`
+* systemd: `sudo systemctl start snap-telemetry`
+* command line: `sudo snapteld -l 1 -t 0 &`
+
+Download and load snap plugins:
+```
+$ wget http://snap.ci.snap-telemetry.io/plugins/snap-plugin-collector-openfoam/latest/linux/x86_64/snap-plugin-collector-openfoam
+$ wget http://snap.ci.snap-telemetry.io/plugins/snap-plugin-publisher-file/latest/linux/x86_64/snap-plugin-publisher-file
+$ snaptel plugin load snap-plugin-collector-openfoam
+$ snaptel plugin load snap-plugin-publisher-file
+```
+
  See available metrics for your system.
  ```
- $ snapctl metric list
+ $ snaptel metric list
  ```
  
  Create a task JSON file:    
  ```json
- {
-     "version": 1,
-     "schedule": {
-         "type": "simple",
-         "interval": "1s"
-     },
-     "workflow": {
-         "collect": {
-             "metrics": {
-                 "/intel/openfoam/k/initial": {},
-                 "/intel/openfoam/Ux/final": {},
-                 "/intel/openfoam/Uy/initial": {}
- 
-             },
-             "config": {
-                 "/intel/openfoam": {
-                     "webServerIP": "192.168.122.89",
-                     "webServerPort": 8000,
-                     "webServerFilePath": "run.log"
-                 }
-             },
-             "process": [
-                 {
-                     "plugin_name": "passthru",
-                     "process": null,
-                     "publish": [
-                         {                         
-                             "plugin_name": "file",
-                             "config": {
-                                 "file": "/tmp/published_openfoam"
-                             }
-                         }
-                     ],
-                     "config": null
-                 }
-             ],
-             "publish": null
-         }
-     }
- }
+{
+    "version":1,
+    "schedule":{
+        "type":"simple",
+        "interval":"1s"
+    },
+    "workflow":{
+        "collect":{
+            "metrics":{
+                "/intel/openfoam/k/initial":{},
+                "/intel/openfoam/Ux/final":{},
+                "/intel/openfoam/Uy/initial":{}
+            },
+            "config":{
+                "/intel/openfoam":{
+                    "webServerIP":"192.168.122.89",
+                    "webServerPort":8000,
+                    "webServerFilePath":"run.log"
+                }
+            },
+            "process":null,
+            "publish":[
+                {
+                    "plugin_name":"file",
+                    "config":{
+                        "file":"/tmp/published_openfoam"
+                    }
+                }
+            ]
+        }
+    }
+}
  ```
- 
- Load passthru plugin for processing:
- ```
- $ snapctl plugin load build/rootfs/plugin/snap-processor-passthru
- Plugin loaded
- Name: passthru
- Version: 1
- Type: processor
- Signed: false
- Loaded Time: Fri, 20 Nov 2015 11:44:03 PST
- ```
- 
- Load file plugin for publishing:
- ```
- $ snapctl plugin load build/rootfs/plugin/snap-publisher-file
- Plugin loaded
- Name: file
- Version: 3
- Type: publisher
- Signed: false
- Loaded Time: Fri, 20 Nov 2015 11:41:39 PST
- ```
- 
+ Alternatively use provided example manifest:
  Change ip address and port of openfoam host in task manifest:
  ```
- vim $SNAP_OPENFOAM_PLUGIN_DIR/example/openfoam-file-example.json
+ vim example/openfoam-file-example.json
  ```
  
  Create task:
  ```
- $ snapctl task create -t $SNAP_OPENFOAM_PLUGIN_DIR/example/openfoam-file-example.json
+ $ snaptel task create -t example/openfoam-file-example.json
  Using task manifest to create task
  Task created
  ID: 02dd7ff4-8106-47e9-8b86-70067cd0a850
