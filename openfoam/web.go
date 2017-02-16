@@ -25,12 +25,12 @@ import (
 	"time"
 )
 
-func openFoamWebCall(swagURL string, path string) ([]byte, error) {
+func openFoamWebCall(swagURL string, path string, timeOut int64) ([]byte, error) {
 
 	callURL := fmt.Sprintf("%s/%s", swagURL, path)
-	timeout := time.Duration(1 * time.Second)
+	timeDuration := time.Duration(timeOut) * time.Second
 	client := http.Client{
-		Timeout: timeout,
+		Timeout: timeDuration,
 	}
 	resp, err := client.Get(callURL)
 	if err != nil {
@@ -44,7 +44,7 @@ func openFoamWebCall(swagURL string, path string) ([]byte, error) {
 	return body, nil
 }
 
-func openFoamURL(ip string, port int) string {
+func openFoamURL(ip string, port int64) string {
 	url := fmt.Sprintf("http://%s:%d", ip, port)
 	return url
 }

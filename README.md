@@ -36,6 +36,7 @@ This plugin requires these config values to be set (examples are given):
 - `webServerIP` (ex. `"192.168.122.89"`)
 - `webServerPort` (ex. `8000`)
 - `webServerFilePath` (ex. `"run.log"`)
+- `timeOut` (ex. `2`)
 
 ### Documentation
 
@@ -79,7 +80,8 @@ Create a task JSON file:
                 "/intel/openfoam":{
                     "webServerIP":"192.168.122.89",
                     "webServerPort":8000,
-                    "webServerFilePath":"run.log"
+                    "webServerFilePath":"run.log",
+                    "timeOut": 2
                 }
             },
             "process":null,
