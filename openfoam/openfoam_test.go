@@ -23,81 +23,63 @@ package openfoam
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
 	"testing"
 
-	"github.com/intelsdi-x/snap/control/plugin"
-	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
-	"github.com/intelsdi-x/snap/core"
-	"github.com/intelsdi-x/snap/core/cdata"
-	"github.com/intelsdi-x/snap/core/ctypes"
+	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	"github.com/jarcoal/httpmock"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestOpenFoamPlugin(t *testing.T) {
-	Convey("Meta should return metadata for the plugin", t, func() {
-		meta := Meta()
-		So(meta.Name, ShouldResemble, Name)
-		So(meta.Version, ShouldResemble, Version)
-		So(meta.Type, ShouldResemble, plugin.CollectorPluginType)
-	})
-
 	Convey("Create OpenFoam Collector", t, func() {
-		openFoamCol := NewOpenFoamCollector()
-		Convey("So psCol should not be nil", func() {
+		openFoamCol := OpenFoam{}
+		Convey("So OpenFoam should not be nil", func() {
 			So(openFoamCol, ShouldNotBeNil)
 		})
-		Convey("So psCol should be of OpenFoam type", func() {
-			So(openFoamCol, ShouldHaveSameTypeAs, &OpenFoam{})
+		Convey("So OpenFoam should be of OpenFoam type", func() {
+			So(openFoamCol, ShouldHaveSameTypeAs, OpenFoam{})
 		})
 		Convey("openFoamCol.GetConfigPolicy() should return a config policy", func() {
 			configPolicy, _ := openFoamCol.GetConfigPolicy()
 			Convey("So config policy should not be nil", func() {
 				So(configPolicy, ShouldNotBeNil)
 			})
-			Convey("So config policy should be a cpolicy.ConfigPolicy", func() {
-				So(configPolicy, ShouldHaveSameTypeAs, &cpolicy.ConfigPolicy{})
+			Convey("So config policy should be a plugin.ConfigPolicy", func() {
+				So(configPolicy, ShouldHaveSameTypeAs, plugin.ConfigPolicy{})
 			})
 		})
 	})
-	Convey("Join namespace ", t, func() {
-		namespace1 := []string{"intel", "openfoam", "one"}
-		namespace2 := []string{}
-		Convey("So namespace should equal intel/openfoam/one", func() {
-			So("/intel/openfoam/one", ShouldResemble, joinNamespace(namespace1))
-		})
-		Convey("So namespace should equal slash", func() {
-			So("/", ShouldResemble, joinNamespace(namespace2))
-		})
 
-	})
 	Convey("Get URI ", t, func() {
 		Convey("So should return 10.1.0.1:8000", func() {
+			var webServerPort int64
 			webServerIP := "10.1.0.1"
-			webServerPort := 8000
+			webServerPort = 8000
 			uri := openFoamURL(webServerIP, webServerPort)
 			So("http://10.1.0.1:8000", ShouldResemble, uri)
 		})
 	})
 	Convey("Get Metrics Types", t, func() {
-		openFoamCol := NewOpenFoamCollector()
-		cfgNode := cdata.NewNode()
-		var cfg = plugin.ConfigType{
-			ConfigDataNode: cfgNode,
-		}
+		openFoamCol := OpenFoam{}
+		config := plugin.Config{}
 		Convey("So should return 12 types of metrics", func() {
-			metrics, err := openFoamCol.GetMetricTypes(cfg)
-			So(12, ShouldResemble, len(metrics))
+			metrics, err := openFoamCol.GetMetricTypes(config)
+			So(len(metrics), ShouldResemble, 12)
 			So(err, ShouldBeNil)
 		})
 		Convey("So should check namespace", func() {
-			metrics, err := openFoamCol.GetMetricTypes(cfg)
-			waitNamespace := joinNamespace(metrics[0].Namespace().Strings())
+			var waitNamespace string
+
+			metrics, err := openFoamCol.GetMetricTypes(config)
+			for _, m := range metrics[0].Namespace.Strings() {
+				waitNamespace = fmt.Sprintf("%s/%s", waitNamespace, m)
+			}
 			wait := regexp.MustCompile(`^/intel/openfoam/k/initial`)
 			So(true, ShouldEqual, wait.MatchString(waitNamespace))
 			So(err, ShouldBeNil)
@@ -106,12 +88,20 @@ func TestOpenFoamPlugin(t *testing.T) {
 
 	})
 	Convey("Collect Metrics", t, func() {
-		openFoamCol := NewOpenFoamCollector()
-		cfgNode := cdata.NewNode()
-		cfgNode.AddItem("webServerIP", ctypes.ConfigValueStr{Value: "192.168.192.200"})
-		cfgNode.AddItem("webServerPort", ctypes.ConfigValueInt{Value: 8000})
-		cfgNode.AddItem("webServerFilePath", ctypes.ConfigValueStr{Value: "test.log"})
+		openFoamCol := OpenFoam{}
+		var port, timeOut int64
+		var ip, filePath string
+		port = 8000
+		ip = "192.168.192.200"
+		filePath = "test.log"
+		timeOut = 1
 
+		config := plugin.Config{
+			"webServerIP":       ip,
+			"webServerPort":     port,
+			"webServerFilePath": filePath,
+			"timeOut":           timeOut,
+		}
 		buf := bytes.NewBuffer(nil)
 		f, _ := os.Open("./openfoam_test.log")
 		io.Copy(buf, f)
@@ -129,45 +119,41 @@ func TestOpenFoamPlugin(t *testing.T) {
 		)
 
 		Convey("So should collect k metrics", func() {
-			metrics := []plugin.MetricType{{
-				Namespace_: core.NewNamespace("intel", "openfoam", "k", "initial"),
-				Config_:    cfgNode,
-			}}
+			metrics := []plugin.Metric{}
+			metrics = append(metrics, plugin.Metric{Namespace: plugin.NewNamespace(Vendor, Plugin, "k", "initial"), Config: config})
+
 			collect, err := openFoamCol.CollectMetrics(metrics)
 			So(err, ShouldBeNil)
-			So(collect[0].Data_, ShouldNotBeNil)
+			So(collect[0].Data, ShouldNotBeNil)
 			So(len(collect), ShouldResemble, 1)
 
 		})
 		Convey("So should collect Uz metrics", func() {
-			metrics := []plugin.MetricType{{
-				Namespace_: core.NewNamespace("intel", "openfoam", "Uz", "final"),
-				Config_:    cfgNode,
-			}}
+			metrics := []plugin.Metric{}
+
+			metrics = append(metrics, plugin.Metric{Namespace: plugin.NewNamespace(Vendor, Plugin, "Uz", "final"), Config: config})
+
 			collect, err := openFoamCol.CollectMetrics(metrics)
 			So(err, ShouldBeNil)
-			So(collect[0].Data_, ShouldNotBeNil)
-			So(collect[0].Data_, ShouldResemble, 2.13410839e-06)
+			So(collect[0].Data, ShouldNotBeNil)
+			So(collect[0].Data, ShouldResemble, 2.13410839e-06)
 			So(len(collect), ShouldResemble, 1)
 
 		})
 		Convey("So should collect Ux metrics", func() {
-			metrics := []plugin.MetricType{{
-				Namespace_: core.NewNamespace("intel", "openfoam", "Ux", "final"),
-				Config_:    cfgNode,
-			}}
+			metrics := []plugin.Metric{}
+			metrics = append(metrics, plugin.Metric{Namespace: plugin.NewNamespace(Vendor, Plugin, "Ux", "final"), Config: config})
+
 			collect, err := openFoamCol.CollectMetrics(metrics)
 			So(err, ShouldBeNil)
-			So(collect[0].Data_, ShouldNotBeNil)
-			So(collect[0].Data_, ShouldResemble, 2.36534655e-07)
+			So(collect[0].Data, ShouldNotBeNil)
+			So(collect[0].Data, ShouldResemble, 2.36534655e-07)
 			So(len(collect), ShouldResemble, 1)
 
 		})
 		Convey("So should return error if value dosn't exist", func() {
-			metrics := []plugin.MetricType{{
-				Namespace_: core.NewNamespace("intel", "openfoam", "fUx", "final"),
-				Config_:    cfgNode,
-			}}
+			metrics := []plugin.Metric{}
+			metrics = append(metrics, plugin.Metric{Namespace: plugin.NewNamespace(Vendor, Plugin, "fUx", "final"), Config: config})
 			_, err := openFoamCol.CollectMetrics(metrics)
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldResemble, "Can't find data in OpenFoamLog")

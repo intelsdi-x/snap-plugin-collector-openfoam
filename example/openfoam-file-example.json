@@ -13,9 +13,10 @@
             },
             "config":{
                 "/intel/openfoam":{
-                    "webServerIP":"192.168.122.89",
+                    "webServerIP":"192.168.122.89", 
                     "webServerPort":8000,
-                    "webServerFilePath":"run.log"
+                    "webServerFilePath":"run.log",
+                    "timeOut": 2
                 }
             },
             "process":null,

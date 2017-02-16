@@ -27,110 +27,95 @@ import (
 	"strings"
 	"time"
 
-	"github.com/intelsdi-x/snap/control/plugin"
-	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
-	"github.com/intelsdi-x/snap/core"
-	"github.com/intelsdi-x/snap/core/ctypes"
+	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 )
 
 const (
-	// Name of plugin
-	Name = "openfoam"
+	// Plugin Name
+	Plugin = "openfoam"
 	// Version of plugin
-	Version = 2
-	// Type of plugin
-	Type = plugin.CollectorPluginType
+	Version = 3
+	// NsMetricPosition from openfoam ns
+	NsMetricPosition = 2
+	// NsSubMetricPosition from openfoam ns
+	NsSubMetricPosition = 3
+	// Vendor Name
+	Vendor = "intel"
 )
-
-// Meta returns plugin meta data info
-func Meta() *plugin.PluginMeta {
-	return plugin.NewPluginMeta(Name, Version, Type, []string{plugin.SnapGOBContentType}, []string{plugin.SnapGOBContentType})
-}
 
 // OpenFoam struct
 type OpenFoam struct {
-}
-
-// NewOpenFoamCollector returns new Collector instance
-func NewOpenFoamCollector() *OpenFoam {
-	return &OpenFoam{}
-
-}
-
-func joinNamespace(ns []string) string {
-	return "/" + strings.Join(ns, "/")
 }
 
 // OpenFoamMetrics contains list of available metrics
 var OpenFoamMetrics = []string{"k", "p", "Ux", "Uy", "Uz", "omega"}
 
 // CollectMetrics returns collected metrics
-func (p *OpenFoam) CollectMetrics(mts []plugin.MetricType) ([]plugin.MetricType, error) {
-	metrics := make([]plugin.MetricType, len(mts))
-
-	webServerIP := mts[0].Config().Table()["webServerIP"].(ctypes.ConfigValueStr).Value
-	webServerPort := mts[0].Config().Table()["webServerPort"].(ctypes.ConfigValueInt).Value
-	webServerFilePath := mts[0].Config().Table()["webServerFilePath"].(ctypes.ConfigValueStr).Value
+func (OpenFoam) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error) {
+	metrics := make([]plugin.Metric, len(mts))
+	webServerIP, err := mts[0].Config.GetString("webServerIP")
+	if err != nil {
+		return nil, err
+	}
+	webServerPort, err := mts[0].Config.GetInt("webServerPort")
+	if err != nil {
+		return nil, err
+	}
+	webServerFilePath, err := mts[0].Config.GetString("webServerFilePath")
+	if err != nil {
+		return nil, err
+	}
+	timeOut, err := mts[0].Config.GetInt("timeOut")
+	if err != nil {
+		return nil, err
+	}
 	webServerURL := openFoamURL(webServerIP, webServerPort)
 
 	var tags map[string]string
 	tags = make(map[string]string)
 	tags["hostname"] = webServerIP
-
 	for i, p := range mts {
 
-		metric, err := openFoamStat(p.Namespace(), webServerURL, webServerFilePath)
+		metric, err := openFoamStat(p.Namespace, webServerURL, webServerFilePath, timeOut)
 		if err != nil {
 			return nil, err
 		}
 		metrics[i] = *metric
-		metrics[i].Tags_ = tags
+		metrics[i].Tags = tags
 
 	}
 	return metrics, nil
 }
 
 // GetConfigPolicy returns a config policy
-func (p *OpenFoam) GetConfigPolicy() (*cpolicy.ConfigPolicy, error) {
-	cp := cpolicy.New()
-	config := cpolicy.NewPolicyNode()
+func (OpenFoam) GetConfigPolicy() (plugin.ConfigPolicy, error) {
 
-	webServerIP, err := cpolicy.NewStringRule("webServerIP", true)
-	handleErr(err)
-	webServerIP.Description = "OpenFoam hostname/ip address"
-	config.Add(webServerIP)
-	webServerPort, err := cpolicy.NewIntegerRule("webServerPort", false, 8000)
-	handleErr(err)
-	webServerPort.Description = "webServerger port / default 8000"
-	config.Add(webServerPort)
-	webServerFilePath, err := cpolicy.NewStringRule("webServerFilePath", true)
-	handleErr(err)
-	webServerIP.Description = "File location"
-	config.Add(webServerFilePath)
+	policy := plugin.NewConfigPolicy()
+	ns := []string{"intel", "openfoam"}
+	policy.AddNewStringRule(ns, "webServerIP", true)
+	policy.AddNewIntRule(ns, "webServerPort", true, plugin.SetDefaultInt(8000))
+	policy.AddNewStringRule(ns, "webServerFilePath", true)
+	policy.AddNewIntRule(ns, "timeOut", false, plugin.SetDefaultInt(2))
 
-	cp.Add([]string{""}, config)
-	return cp, nil
+	return *policy, nil
 
 }
 
 // GetMetricTypes returns metric types that can be collected
-func (p *OpenFoam) GetMetricTypes(cfg plugin.ConfigType) ([]plugin.MetricType, error) {
-	var metrics []plugin.MetricType
+func (OpenFoam) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
+	var metrics []plugin.Metric
 	for _, metricType := range OpenFoamMetrics {
-		metrics = append(metrics, plugin.MetricType{Namespace_: core.NewNamespace("intel", "openfoam", metricType, "initial")})
-		metrics = append(metrics, plugin.MetricType{Namespace_: core.NewNamespace("intel", "openfoam", metricType, "final")})
+		for _, m := range []string{"initial", "final"} {
+			ns := plugin.NewNamespace(Vendor, Plugin, metricType, m)
+			metric := plugin.Metric{Namespace: ns, Version: Version}
+			metrics = append(metrics, metric)
+		}
 	}
 	return metrics, nil
 }
 
-func handleErr(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
-func openFoamStat(ns core.Namespace, webServerURL string, path string) (*plugin.MetricType, error) {
-	data, err := getOpenFoamLog(webServerURL, path)
+func openFoamStat(ns plugin.Namespace, webServerURL string, path string, timeOut int64) (*plugin.Metric, error) {
+	data, err := getOpenFoamLog(webServerURL, path, timeOut)
 	if err != nil {
 		return nil, err
 	}
@@ -140,16 +125,16 @@ func openFoamStat(ns core.Namespace, webServerURL string, path string) (*plugin.
 		return nil, err
 	}
 
-	return &plugin.MetricType{
-		Namespace_: ns,
-		Data_:      value,
-		Timestamp_: time.Now(),
+	return &plugin.Metric{
+		Namespace: ns,
+		Data:      value,
+		Timestamp: time.Now(),
 	}, nil
 
 }
 
-func getLastValue(ns core.Namespace, data []string) (float64, error) {
-	searchFor := ns.Strings()[2]
+func getLastValue(ns plugin.Namespace, data []string) (float64, error) {
+	searchFor := ns.Strings()[NsMetricPosition]
 	switch searchFor {
 	case "k":
 		searchFor = "for k"
@@ -159,7 +144,7 @@ func getLastValue(ns core.Namespace, data []string) (float64, error) {
 
 	for i := len(data) - 1; i >= 0; i-- {
 		if strings.Contains(data[i], searchFor) {
-			value, err := getPositionalValue(ns.Strings()[3], data[i])
+			value, err := getPositionalValue(ns.Strings()[NsSubMetricPosition], data[i])
 
 			if err != nil {
 				log.Fatal(err)
@@ -201,8 +186,8 @@ func getPositionalValue(position string, data string) (string, error) {
 
 }
 
-func getOpenFoamLog(webServerURL string, path string) ([]byte, error) {
-	response, err := openFoamWebCall(webServerURL, path)
+func getOpenFoamLog(webServerURL string, path string, timeOut int64) ([]byte, error) {
+	response, err := openFoamWebCall(webServerURL, path, timeOut)
 	if err != nil {
 		log.Println("Error in call getOpenFoamLog", err)
 		return []byte{}, err
