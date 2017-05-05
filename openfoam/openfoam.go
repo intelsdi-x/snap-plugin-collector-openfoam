@@ -34,7 +34,7 @@ const (
 	// Plugin Name
 	Plugin = "openfoam"
 	// Version of plugin
-	Version = 3
+	Version = 4
 	// NsMetricPosition from openfoam ns
 	NsMetricPosition = 2
 	// NsSubMetricPosition from openfoam ns
